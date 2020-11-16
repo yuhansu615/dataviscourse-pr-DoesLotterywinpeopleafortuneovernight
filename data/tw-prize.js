@@ -54,7 +54,7 @@ function parseDom(dom) {
       count = 0;
     }
     let content = $(ele).text();
-    fs.appendFileSync(filepath, `${count !== 0 ? "," : ""}${content}`);
+    fs.appendFileSync(filepath, `${count !== 0 ? "," : ""}${content.replace(/[,\s]/g, "")}`);
     count += 1;
   });
   if (reqPageNum < totalPageCount) {

@@ -7,6 +7,7 @@ const filepath = "./tw-number.csv";
 
 let reqPageNum = 0;
 let totalPageCount = 75;
+let columnCount = 9;
 
 function sendRequest(pageNum) {
   const requestBody = {
@@ -48,7 +49,7 @@ function parseDom(dom) {
   let count = 0;
   $ = cheerio.load(dom);
   $(".TDLine1").each((i, ele) => {
-    if (count === 9 || count === 0) {
+    if (count === columnCount || count === 0) {
       fs.appendFileSync(filepath, "\r\n");
       count = 0;
     }
@@ -57,7 +58,7 @@ function parseDom(dom) {
       // 移除後面六個用來描述開出順序的數字
       content = content.slice(0, content.length - 6);
     }
-    fs.appendFileSync(filepath, `${count !== 0 ? "," : ""}${content}`);
+    fs.appendFileSync(filepath, `${count !== 0 ? "," : ""}${content.replace(/,/g, "")}`);
     count += 1;
   });
   if (reqPageNum < totalPageCount) {
