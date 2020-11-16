@@ -3,10 +3,10 @@ const fs = require("fs");
 const iconv = require("iconv-lite");
 const querystring = require("querystring");
 const cheerio = require("cheerio");
-const filepath = "./tw-location.csv";
+const filepath = "./tw-number.csv";
 
 let reqPageNum = 0;
-let totalPageCount = 18;
+let totalPageCount = 75;
 
 function sendRequest(pageNum) {
   const requestBody = {
@@ -18,7 +18,7 @@ function sendRequest(pageNum) {
 
   const options = {
     hostname: "lotto.bestshop.com.tw",
-    path: "/649/where.asp",
+    path: "/649/list.asp",
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -48,11 +48,15 @@ function parseDom(dom) {
   let count = 0;
   $ = cheerio.load(dom);
   $(".TDLine1").each((i, ele) => {
-    if (count === 8 || count === 0) {
+    if (count === 9 || count === 0) {
       fs.appendFileSync(filepath, "\r\n");
       count = 0;
     }
-    const content = $(ele).text();
+    let content = $(ele).text();
+    if (count === 3) {
+      // 移除後面六個用來描述開出順序的數字
+      content = content.slice(0, content.length - 6);
+    }
     fs.appendFileSync(filepath, `${count !== 0 ? "," : ""}${content}`);
     count += 1;
   });

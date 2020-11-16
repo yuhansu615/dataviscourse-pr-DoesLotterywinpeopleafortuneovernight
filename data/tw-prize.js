@@ -3,10 +3,11 @@ const fs = require("fs");
 const iconv = require("iconv-lite");
 const querystring = require("querystring");
 const cheerio = require("cheerio");
-const filepath = "./tw-location.csv";
+const filepath = "./tw-prize.csv";
 
 let reqPageNum = 0;
-let totalPageCount = 18;
+let totalPageCount = 75;
+let columnCount = 21;
 
 function sendRequest(pageNum) {
   const requestBody = {
@@ -18,7 +19,7 @@ function sendRequest(pageNum) {
 
   const options = {
     hostname: "lotto.bestshop.com.tw",
-    path: "/649/where.asp",
+    path: "/649/prize.asp",
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -48,11 +49,11 @@ function parseDom(dom) {
   let count = 0;
   $ = cheerio.load(dom);
   $(".TDLine1").each((i, ele) => {
-    if (count === 8 || count === 0) {
+    if (count === columnCount || count === 0) {
       fs.appendFileSync(filepath, "\r\n");
       count = 0;
     }
-    const content = $(ele).text();
+    let content = $(ele).text();
     fs.appendFileSync(filepath, `${count !== 0 ? "," : ""}${content}`);
     count += 1;
   });
