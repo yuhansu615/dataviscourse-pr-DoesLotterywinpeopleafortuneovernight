@@ -1,5 +1,6 @@
 # Does Lottery win people a fortune overnight?
 Yuhan Su, Zoe Zhang 
+
 Project for CS6630datavis
 # Install
 
