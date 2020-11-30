@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="http://d3js.org/topojson.v1.min.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <style>
+      #container {
+        display: flex;
+        height: 500px;
+      }
+      .buttonGroup {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+      #my_dataviz2 {
+        text-align: center;
+      }
+      .bottomContainer {
+        height: 30px;
+      }
+      .inputNum {
+        width: 80px;
+      }
+      .box-card {
+        width: 45%;
+      }
+      .prizeContainer {
+        height: 500px;
+        overflow-y: scroll;
+      }
+      #locationInfoBox {
+        position: fixed;
+        left: 0px;
+        top: 100px;
+        height: 80%;
+        width: 200px;
+        background-color: wheat;
+        opacity: 1;
+        padding: 10px;
+        overflow-y: scroll;
+      }
+      #plotInfoBox {
+        position: fixed;
+        right: 0px;
+        top: 100px;
+        height: 80%;
+        width: 200px;
+        background-color: wheat;
+        opacity: 1;
+        padding: 10px;
+        overflow-y: scroll;
+      }
+      .box-card {
+        margin: 0 auto;
+        margin-bottom: 100px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div id="container">
+        <svg id="svg1" style="width: 900; height: 600"></svg>
+        <svg id="svg2" style="width: 900; height: 400"></svg>
+        <svg id="svg3" style="width: 600; height: 600"></svg>
+      </div>
+      <div class="buttonGroup">
+        <template>
+          <el-checkbox-group @change="handleCheckboxChange" v-model="checkList">
+            <el-checkbox label="United States"></el-checkbox>
+            <el-checkbox label="China"></el-checkbox>
+            <el-checkbox label="Taiwan"></el-checkbox>
+          </el-checkbox-group>
+        </template>
+      </div>
+      <div id="my_dataviz2"></div>
+      <div v-if="showLocationInfoBox" id="locationInfoBox">
+        <div>地區：{{locationInfoBoxDataSelected.province}}</div>
+        <div>出現次數：{{locationInfoBoxDataSelected?.list?.length}}</div>
+        <div>
+          出現店名：
+          <div v-for="item in locationInfoBoxDataSelected?.list" :key="item">
+            {{item.shop}}
+          </div>
+        </div>
+      </div>
+      <div v-if="showPlotChartInfoBox" id="plotInfoBox">
+        <div>年份：{{plotInfoBoxDataSelected.year}}</div>
+        <div>數字：{{plotInfoBoxDataSelected.number}}</div>
+        <div>出現次數：{{plotInfoBoxDataSelected?.list?.length}}</div>
+        <div>
+          出現月份：
+          <div v-for="item in plotInfoBoxDataSelected?.list" :key="item">
+            {{item}}
+          </div>
+        </div>
+      </div>
+      <el-card class="box-card">
+        <div class="bottomContainer">Lottery Simulator</div>
+        <div>
+          <el-input
+            maxlength="2"
+            class="inputNum"
+            v-model="num01"
+            placeholder=""
+          ></el-input>
+          <el-input
+            maxlength="2"
+            class="inputNum"
+            v-model="num02"
+            placeholder=""
+          ></el-input>
+          <el-input
+            maxlength="2"
+            class="inputNum"
+            v-model="num03"
+            placeholder=""
+          ></el-input>
+          <el-input
+            maxlength="2"
+            class="inputNum"
+            v-model="num04"
+            placeholder=""
+          ></el-input>
+          <el-input
+            maxlength="2"
+            class="inputNum"
+            v-model="num05"
+            placeholder=""
+          ></el-input>
+          <el-input
+            maxlength="2"
+            class="inputNum"
+            v-model="num06"
+            placeholder=""
+          ></el-input>
+          <el-button @click="handleBacktest" type="success" plain
+            >回測</el-button
+          >
+        </div>
+        <div class="prizeContainer">
+          <template>
+            <el-table :data="tableData" style="width: 100%">
+              <el-table-column prop="year" label="日期" width="180">
+              </el-table-column>
+              <el-table-column prop="isWinning" label="獎金" width="180">
+              </el-table-column>
+              <el-table-column prop="winningNumber" label="中獎細節">
+              </el-table-column>
+            </el-table>
+          </template>
+        </div>
+      </el-card>
+    </div>
+  </body>
+  <script>
+    const app = new Vue({
+      el: "#root",
+      created: async function () {
+        this.resetMap();
+        this.twLotteryChartData = await this.processTWData();
+        this.renderPlotChart();
+      },
+      data: {
+        checkList: ["United States", "China", "Taiwan"],
+        twLotteryChartData: "",
+        historyPrizeInfo: [],
+        num01: "",
+        num02: "",
+        num03: "",
+        num04: "",
+        num05: "",
+        num06: "",
+        tableData: [],
+        plotInfoBoxData: "",
+        plotInfoBoxDataSelected: "",
+        showPlotChartInfoBox: false,
+        locationInfoBoxData: "",
+        locationInfoBoxDataSelected: "",
+        showLocationInfoBox: true,
+      },
+      computed: {
+        numberGroup() {
+          return [
+            this.num01,
+            this.num02,
+            this.num03,
+            this.num04,
+            this.num05,
+            this.num06,
+          ];
+        },
+      },
+      methods: {
+        handleCloseInfoBox() {
+          this.showPlotChartInfoBox = false;
+        },
+        handleBacktest() {
+          if (
+            this.numberGroup.filter((num) => num && num >= 0 && num <= 49)
+              .length < 6
+          ) {
+            alert("號碼不齊全，且號碼必須為 1 到 49");
+            return;
+          }
+          if (new Set(this.numberGroup).size < 6) {
+            alert("號碼重複");
+            return;
+          }
+          const c = [];
+          this.historyPrizeInfo.forEach((period) => {
+            const result = compareTWNumber(
+              this.numberGroup,
+              period.numberArray,
+              period.year
+            );
+            if (result.isWinning !== "未中獎") {
+              c.push(result);
+              this.tableData = c;
+            }
+          });
+        },
+        async handleCheckboxChange(e) {
+          //const list = e.slice(0, e.length);
+        },
+        async processTWData() {
+          const numInfo = {};
+          const numInfoDetail = {};
+          const chartNumInfo = [];
+          const data = await d3.csv("./data/tw/tw-number.csv");
+          data.forEach((ele) => {
+            const year = ele.year.slice(0, 4);
+            let numberArray = ele.numbers.match(/.{1,2}/g);
+            // 中獎回測資料
+            this.historyPrizeInfo.push({
+              numberArray,
+              specialNum: numberArray[6],
+              year: ele.year,
+            });
+            // 圖表資料
+            numberArray.forEach((num) => {
+              // 記錄開出次數
+              if (!numInfo[year]) {
+                numInfo[year] = {};
+              }
+              if (!numInfo[year][num]) {
+                numInfo[year][num] = 0;
+              }
+              numInfo[year][num] += 1;
+              // 記錄開出月份
+              if (!numInfoDetail[year]) {
+                numInfoDetail[year] = {};
+              }
+              if (!numInfoDetail[year][num]) {
+                numInfoDetail[year][num] = [];
+              }
+              numInfoDetail[year][num].push(ele.year);
+            });
+          });
+          console.log(numInfoDetail);
+          this.plotInfoBoxData = numInfoDetail;
+          Object.keys(numInfo).forEach((year) => {
+            Object.keys(numInfo[year]).forEach((number) => {
+              chartNumInfo.push({
+                year,
+                number,
+                count: numInfo[year][number],
+              });
+            });
+          });
+          return chartNumInfo;
+        },
+        renderUSMap({ scale }) {
+          var width = 1200;
+          var height = 500;
+
+          // D3 Projection
+          var projection = d3
+            .geoAlbersUsa()
+            .translate([width / 5, height / 2])
+            .scale([scale]);
+
+          // Define path generator
+          var path = d3
+            .geoPath() // path generator that will convert GeoJSON to SVG paths
+            .projection(projection); // tell path generator to use albersUsa projection
+          d3.json("./data/us/state.json").then(function (json) {
+            d3.select("#svg1")
+              .selectAll("path")
+              .data(json.features)
+              .enter()
+              .append("path")
+              .attr("d", path)
+              .attr("id", (d) => d.properties.name)
+              .style("stroke", "#fff")
+              .style("stroke-width", "1")
+              .style("fill", "rgb(213,222,217)");
+          });
+        },
+        renderCNMap({ scale }) {
+          var width = 1200;
+          var height = 500;
+
+          // D3 Projection
+          var projection = d3
+            .geoMercator()
+            .center([110, 25])
+            .scale([scale])
+            .translate([width / 4.5, 350])
+            .precision([0.1]);
+
+          // Define path generator
+          var path = d3
+            .geoPath() // path generator that will convert GeoJSON to SVG paths
+            .projection(projection); // tell path generator to use albersUsa projection
+
+          //Create SVG element and append map to the SVG
+
+          d3.json("./data/cn/state.json").then(function (json) {
+            d3.select("#svg2")
+              .selectAll("path")
+              .data(json.features)
+              .enter()
+              .append("path")
+              .attr("d", path)
+              .attr("id", (d) => d.properties.name)
+              .style("stroke", "#fff")
+              .style("stroke-width", "1")
+              .style("fill", "rgb(213,222,217)");
+          });
+        },
+        renderTWMap({ scale }) {
+          const context = this;
+          d3.json("./data/tw/state.json").then(function (topodata) {
+            const features = topojson.feature(topodata, topodata.objects.county)
+              .features;
+            const projection = d3
+              .geoMercator()
+              .center([118, 27])
+              .scale([scale])
+              .translate([0, 0])
+              .precision([0.1]);
+            const path = d3.geoPath().projection(projection);
+            d3.select("#svg3")
+              .selectAll("path")
+              .data(features)
+              .enter()
+              .append("path")
+              .attr("d", path)
+              .attr("id", ({ properties }) => properties.C_Name)
+              .attr("fill", "teal")
+              .on("mouseover", function ({ properties }) {
+                d3.select(this).attr("fill-opacity", 0.6);
+                console.log(context.locationInfoBoxData)
+                context.locationInfoBoxDataSelected = {
+                  province: properties.C_Name,
+                  list: context.locationInfoBoxData[properties.C_Name]
+                }
+                context.showLocationInfoBox = true;
+              })
+              .on("mouseout", function (d) {
+                d3.select(this).attr("fill-opacity", 1);
+                context.showLocationInfoBox = false;
+              });
+          });
+          d3.csv("./data/tw/tw-location.csv").then((data) => {
+            console.log(data);
+            const provinceCount = {};
+            const detailProvinceCount = {};
+            data.forEach((lottery) => {
+              const province = lottery["province"];
+              if (provinceCount[province]) {
+                provinceCount[province] += 1;
+              } else {
+                provinceCount[province] = 1;
+              }
+
+              if (detailProvinceCount[province]) {
+                detailProvinceCount[province].push(lottery);
+              } else {
+                detailProvinceCount[province] = [];
+              }
+            });
+            console.log(provinceCount);
+            console.log(detailProvinceCount);
+            this.locationInfoBoxData = detailProvinceCount;
+            Object.keys(provinceCount).forEach((province) => {
+              d3.select(`#${province}`).attr(
+                "fill",
+                twColorGrade(provinceCount[province])
+              );
+            });
+          });
+        },
+        resetMap() {
+          document.querySelector("#svg1").innerHTML = "";
+          document.querySelector("#svg2").innerHTML = "";
+          document.querySelector("#svg3").innerHTML = "";
+          this.renderUSMap({
+            scale: 600,
+          });
+          this.renderCNMap({
+            scale: 400,
+          });
+          this.renderTWMap({
+            scale: 4000,
+          });
+        },
+        renderPlotChart() {
+          var margin = { top: 10, right: 30, bottom: 40, left: 50 },
+            width = 1120 - margin.left - margin.right,
+            height = 520 - margin.top - margin.bottom;
+
+          // append the svg object to the body of the page
+          var Svg = d3
+            .select("#my_dataviz2")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr(
+              "transform",
+              "translate(" + margin.left + "," + margin.top + ")"
+            );
+
+          //Read the data
+          d3.csv(
+            "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/iris.csv"
+          ).then(async (data) => {
+            // Add X axis
+            var x = d3.scaleLinear().domain([0, 60]).range([0, width]);
+            Svg.append("g")
+              .attr("transform", "translate(0," + height + ")")
+              .call(
+                d3
+                  .axisBottom(x)
+                  .tickSize(-height * 1.3)
+                  .ticks(60)
+              )
+              .select(".domain")
+              .remove();
+
+            // Add Y axis
+            var y = d3
+              .scaleLinear()
+              .domain([2005, 2020])
+              .range([height, 0])
+              .nice();
+            Svg.append("g")
+              .call(
+                d3
+                  .axisLeft(y)
+                  .tickSize(-width * 1.3)
+                  .ticks(20)
+              )
+              .select(".domain")
+              .remove();
+
+            // Customization
+            Svg.selectAll(".tick line").attr("stroke", "#EBEBEB");
+
+            // Add X axis label:
+            Svg.append("text")
+              .attr("text-anchor", "end")
+              .attr("x", width)
+              .attr("y", height + margin.top + 20)
+              .text("Numbers");
+
+            // Y axis label:
+            Svg.append("text")
+              .attr("text-anchor", "end")
+              .attr("transform", "rotate(-90)")
+              .attr("y", -margin.left + 20)
+              .attr("x", -margin.top)
+              .text("Years");
+
+            // Color scale: give me a specie name, I return a color
+            var color = d3
+              .scaleOrdinal()
+              .domain(["setosa", "versicolor", "virginica"])
+              .range(["#402D54", "#D18975", "#8FD175"]);
+            // Add dots
+            const dotGroup = Svg.append("g").attr("id", "dotGroup");
+            const context = this;
+            dotGroup
+              .selectAll("circle")
+              .data(this.twLotteryChartData)
+              .enter()
+              .append("circle")
+              .attr("cx", function (d) {
+                return x(Number(d.number));
+              })
+              .attr("cy", function (d) {
+                return y(Number(d.year));
+              })
+              .attr("r", 6)
+              .style("fill", (d) => twColorGrade(d.count))
+              .on("mouseover", function (d) {
+                context.showPlotChartInfoBox = true;
+                d3.select(this).attr("fill-opacity", 0.6);
+                context.plotInfoBoxDataSelected = {
+                  number: d.number,
+                  year: d.year,
+                  list: context.plotInfoBoxData[d.year][d.number],
+                };
+                console.log(context.plotInfoBoxDataSelected);
+              })
+              .on("mouseout", function (d) {
+                context.showPlotChartInfoBox = false;
+                d3.select(this).attr("fill-opacity", 1);
+              });
+          });
+        },
+      },
+    });
+
+    const twColorGrade = (count) => {
+      if (count <= 5) {
+        return "#1de9b6";
+      }
+      if (count > 5 && count <= 10) {
+        return "#fff59d";
+      }
+      if (count > 10 && count <= 15) {
+        return "#ffcc80";
+      }
+      if (count > 15 && count <= 20) {
+        return "#ff7043";
+      }
+      if (count > 20) {
+        return "#ab47bc";
+      }
+    };
+
+    function compareTWNumber(array1, array2, year) {
+      var result = {};
+
+      array1
+        .map((d) => Number(d))
+        .forEach(function (item) {
+          result[item] = 0;
+        });
+
+      array2
+        .map((d) => Number(d))
+        .forEach(function (item) {
+          if (result.hasOwnProperty(item)) {
+            result[item]++;
+          }
+        });
+      const matchNumberCount = Object.entries(result)
+        .map((arr) => arr[1])
+        .reduce((a, b) => a + b);
+      const hasSpecial = result[array2[6]] === 1;
+      function isWinning() {
+        if (matchNumberCount === 3 && hasSpecial) {
+          return "柒獎 400";
+        }
+        if (matchNumberCount === 3 && !hasSpecial) {
+          return "普獎 400";
+        }
+        if (matchNumberCount === 4 && hasSpecial) {
+          return "陸獎 1000";
+        }
+        if (matchNumberCount === 4 && !hasSpecial) {
+          return "伍獎 2000";
+        }
+        if (matchNumberCount === 5 && hasSpecial) {
+          return "肆獎 約一萬多";
+        }
+        if (matchNumberCount === 5 && !hasSpecial) {
+          return "參獎 約五萬多";
+        }
+        if (matchNumberCount === 6 && hasSpecial) {
+          return "貳獎 約三百萬多";
+        }
+        if (matchNumberCount === 6 && !hasSpecial) {
+          return "頭獎!! 一億以上";
+        }
+        return "未中獎";
+      }
+
+      return {
+        winningNumber: JSON.stringify(
+          Object.entries(result)
+            .filter((d) => d[1] === 1)
+            .map((d) => d[0])
+        ),
+        matchNumberCount,
+        specialNum: array2[6],
+        hasSpecial,
+        isWinning: isWinning(),
+        year,
+      };
+    }
+  </script>
+</html>

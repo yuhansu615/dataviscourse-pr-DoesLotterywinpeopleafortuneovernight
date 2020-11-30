@@ -6,5 +6,3 @@
 # Usage
 
 1. node ./data/tw-location.js
-
-

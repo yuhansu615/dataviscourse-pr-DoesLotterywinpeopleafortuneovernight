@@ -3,11 +3,10 @@ const fs = require("fs");
 const iconv = require("iconv-lite");
 const querystring = require("querystring");
 const cheerio = require("cheerio");
-const filepath = "./tw-number.csv";
+const filepath = "./tw-location.csv";
 
 let reqPageNum = 0;
-let totalPageCount = 75;
-let columnCount = 9;
+let totalPageCount = 18;
 
 function sendRequest(pageNum) {
   const requestBody = {
@@ -19,7 +18,7 @@ function sendRequest(pageNum) {
 
   const options = {
     hostname: "lotto.bestshop.com.tw",
-    path: "/649/list.asp",
+    path: "/649/where.asp",
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -45,20 +44,21 @@ function sendRequest(pageNum) {
   req.end();
 }
 
+let headerFlag = false;
 function parseDom(dom) {
   let count = 0;
   $ = cheerio.load(dom);
+  if (!headerFlag) {
+    fs.appendFileSync(filepath, "No,releaseNo,year,day,province,district,road,shop")
+    headerFlag = true;
+  }
   $(".TDLine1").each((i, ele) => {
-    if (count === columnCount || count === 0) {
+    if (count === 8 || count === 0) {
       fs.appendFileSync(filepath, "\r\n");
       count = 0;
     }
-    let content = $(ele).text();
-    if (count === 3) {
-      // 移除後面六個用來描述開出順序的數字
-      content = content.slice(0, content.length - 6);
-    }
-    fs.appendFileSync(filepath, `${count !== 0 ? "," : ""}${content.replace(/,/g, "")}`);
+    const content = $(ele).text();
+    fs.appendFileSync(filepath, `${count !== 0 ? "," : ""}${content}`);
     count += 1;
   });
   if (reqPageNum < totalPageCount) {
