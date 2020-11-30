@@ -263,7 +263,6 @@
               numInfoDetail[year][num].push(ele.year);
             });
           });
-          console.log(numInfoDetail);
           this.plotInfoBoxData = numInfoDetail;
           Object.keys(numInfo).forEach((year) => {
             Object.keys(numInfo[year]).forEach((number) => {
@@ -357,7 +356,6 @@
               .attr("fill", "teal")
               .on("mouseover", function ({ properties }) {
                 d3.select(this).attr("fill-opacity", 0.6);
-                console.log(context.locationInfoBoxData)
                 context.locationInfoBoxDataSelected = {
                   province: properties.C_Name,
                   list: context.locationInfoBoxData[properties.C_Name]
@@ -370,7 +368,6 @@
               });
           });
           d3.csv("./data/tw/tw-location.csv").then((data) => {
-            console.log(data);
             const provinceCount = {};
             const detailProvinceCount = {};
             data.forEach((lottery) => {
@@ -384,11 +381,9 @@
               if (detailProvinceCount[province]) {
                 detailProvinceCount[province].push(lottery);
               } else {
-                detailProvinceCount[province] = [];
+                detailProvinceCount[province] = [lottery];
               }
             });
-            console.log(provinceCount);
-            console.log(detailProvinceCount);
             this.locationInfoBoxData = detailProvinceCount;
             Object.keys(provinceCount).forEach((province) => {
               d3.select(`#${province}`).attr(
@@ -509,7 +504,6 @@
                   year: d.year,
                   list: context.plotInfoBoxData[d.year][d.number],
                 };
-                console.log(context.plotInfoBoxDataSelected);
               })
               .on("mouseout", function (d) {
                 context.showPlotChartInfoBox = false;
