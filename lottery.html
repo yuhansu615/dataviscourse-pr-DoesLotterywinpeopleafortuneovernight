@@ -6,98 +6,11 @@
       rel="stylesheet"
       href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
     />
-    <link
-      rel="stylesheet"
-      href="./asset/text-animate.css"
-    />
+    <link rel="stylesheet" href="./asset/index.css" />
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="http://d3js.org/topojson.v1.min.js"></script>
     <script src="./asset/elementui.js"></script>
-    <style>
-      body {
-        min-width: 1200px;
-      }
-      #container {
-        display: flex;
-        height: 500px;
-      }
-      .buttonGroup {
-        text-align: center;
-        margin-bottom: 50px;
-      }
-      #my_dataviz2 {
-        text-align: center;
-      }
-      .bottomContainer {
-        height: 30px;
-      }
-      .inputNum {
-        width: 80px;
-      }
-      .box-card {
-        width: 45%;
-      }
-      .prizeContainer {
-        height: 500px;
-        overflow-y: scroll;
-      }
-      #locationInfoBox {
-        position: fixed;
-        left: 0px;
-        top: 100px;
-        height: 80%;
-        width: 200px;
-        background-color: wheat;
-        opacity: 1;
-        padding: 10px;
-        overflow-y: scroll;
-      }
-      #plotInfoBox {
-        position: fixed;
-        right: 0px;
-        top: 100px;
-        height: 80%;
-        width: 200px;
-        background-color: wheat;
-        opacity: 1;
-        padding: 10px;
-        overflow-y: scroll;
-      }
-      .box-card {
-        margin: 0 auto;
-        margin-bottom: 100px;
-      }
-      .header {
-        width: 100%;
-        height: 300px;
-        background-color: #f1dd7b;
-      }
-      .header-img01 {
-        margin-top: 100px;
-        width: 60%;
-        margin-left: 100px;
-      }
-      .header-img02 {
-        position: absolute;
-        width: 10%;
-        top: 20px;
-        right: 20px;
-      }
-      .bottom-container {
-        background-color: #f1dd7b;
-        background-image: url("./asset/bottom01.png");
-        display: flex;
-        padding: 20px;
-        padding-top: 100px;
-        padding-right: 10%;
-      }
-      .hint-container {
-        width: 30%;
-        height: 200px;
-        background-color: white;
-      }
-    </style>
   </head>
   <body>
     <div id="root">
@@ -127,9 +40,9 @@
         </div>
         <div>
           Name of the Store：
-          <div v-for="item in locationInfoBoxDataSelected?.list" :key="item">
-            {{item.shop}}
-          </div>
+          <span v-for="item in locationInfoBoxDataSelected?.list" :key="item">
+            {{item?.shop}}
+          </span>
         </div>
       </div>
       <div v-if="showPlotChartInfoBox" id="plotInfoBox">
@@ -202,7 +115,7 @@
             </template>
           </div>
         </el-card>
-        <div class="hint-container"></div>
+        <div id="hint-container"></div>
       </div>
     </div>
   </body>
@@ -213,6 +126,8 @@
         this.resetMap();
         this.twLotteryChartData = await this.processTWData();
         this.renderPlotChart();
+
+        this.typeWriter();
       },
       data: {
         checkList: ["United States", "China", "Taiwan"],
@@ -231,6 +146,7 @@
         locationInfoBoxData: "",
         locationInfoBoxDataSelected: "",
         showLocationInfoBox: false,
+        typingTimeout: "",
       },
       computed: {
         numberGroup() {
@@ -245,6 +161,35 @@
         },
       },
       methods: {
+        typeWriter() {
+          const context = this;
+          if (this.typingTimeout) {
+            clearTimeout(this.typingTimeout);
+          }
+          document.getElementById("hint-container").innerHTML = "";
+          var i = 0;
+          var txt = `
+                  Jackpot ! It is only 0.001% to
+                  win this fortune. Lottery is essentially a type of Gambling.
+                  Please use your money carefully. As it shows in some of the
+                  social studies, people with financial problems, especially in
+                  the pendemic period, are tend to be addicted to small gambling
+                  like Lottery. They would: · gamble regardless of their financial
+                  situation and that of their families · become heavily indebted,
+                  resulting in family problems (including child abuse and suicide)
+                  · sometimes connect with gangs, usury and other social problems`; /* The text */
+          var speed = 50; /* The speed/duration of the effect in milliseconds */
+          function doTyping() {
+            if (i < txt.length) {
+              document.getElementById("hint-container").innerHTML += txt.charAt(
+                i
+              );
+              i++;
+              context.typingTimeout = setTimeout(doTyping, speed);
+            }
+          }
+          doTyping();
+        },
         handleCloseInfoBox() {
           this.showPlotChartInfoBox = false;
         },
@@ -274,6 +219,7 @@
               this.tableData = c;
             }
           });
+          this.typeWriter();
         },
         async handleCheckboxChange(e) {
           //const list = e.slice(0, e.length);
@@ -324,7 +270,7 @@
           });
           return chartNumInfo;
         },
-        renderUSMap({ scale }) {
+        async renderUSMap({ scale }) {
           var width = 1200;
           var height = 500;
 
@@ -338,6 +284,7 @@
           var path = d3
             .geoPath() // path generator that will convert GeoJSON to SVG paths
             .projection(projection); // tell path generator to use albersUsa projection
+          const context = this;
           d3.json("./data/us/state.json").then(function (json) {
             d3.select("#svg1")
               .selectAll("path")
@@ -348,7 +295,29 @@
               .attr("id", (d) => d.properties.name)
               .style("stroke", "#fff")
               .style("stroke-width", "1")
-              .style("fill", "rgb(213,222,217)");
+              .style("fill", "rgb(213,222,217)")
+              .on("mouseover", function ({ properties }) {
+                context.showLocationInfoBox = true;
+                d3.select(this).attr("fill-opacity", 0.6);
+                context.locationInfoBoxDataSelected = {
+                  province: properties.name,
+                  list: new Array(locationData[properties.name]),
+                };
+              })
+              .on("mouseout", function (d) {
+                d3.select(this).attr("fill-opacity", 1);
+                context.showLocationInfoBox = false;
+              });
+          });
+
+          const locationData = await d3.json("./data/us/location.json");
+
+          Object.keys(locationData).forEach((state) => {
+            console.log(state);
+            d3.select(`#${state}`).style(
+              "fill",
+              usColorGrade(locationData[state])
+            );
           });
         },
         renderCNMap({ scale }) {
@@ -562,6 +531,24 @@
         },
       },
     });
+
+    const usColorGrade = (count) => {
+      if (count <= 5) {
+        return "#1de9b6";
+      }
+      if (count > 5 && count <= 10) {
+        return "#fff59d";
+      }
+      if (count > 10 && count <= 15) {
+        return "#ffcc80";
+      }
+      if (count > 15 && count <= 20) {
+        return "#ff7043";
+      }
+      if (count > 20) {
+        return "#ab47bc";
+      }
+    };
 
     const twColorGrade = (count) => {
       if (count <= 5) {

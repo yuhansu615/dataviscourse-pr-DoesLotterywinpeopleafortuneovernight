@@ -1,0 +1,86 @@
+
+      body {
+        min-width: 1200px;
+      }
+      #container {
+        display: flex;
+        height: 500px;
+      }
+      .buttonGroup {
+        text-align: center;
+        margin-bottom: 50px;
+      }
+      #my_dataviz2 {
+        text-align: center;
+      }
+      .bottomContainer {
+        height: 30px;
+      }
+      .inputNum {
+        width: 80px;
+      }
+      .box-card {
+        width: 45%;
+      }
+      .prizeContainer {
+        height: 500px;
+        overflow-y: scroll;
+      }
+      #locationInfoBox {
+        position: fixed;
+        left: 20%;
+        top: 200px;
+        height: 150px;
+        width: 60%;
+        background-color: white;
+        border: 1px dotted black;
+        opacity: 1;
+        padding: 10px;
+        overflow-y: scroll;
+      }
+      #plotInfoBox {
+        position: fixed;
+        right: 100px;
+        top: 100px;
+        height: 80%;
+        width: 200px;
+        background-color: white;
+        border: 1px dotted black;
+        opacity: 1;
+        padding: 10px;
+        overflow-y: scroll;
+      }
+      .box-card {
+        margin: 0 auto;
+        margin-bottom: 100px;
+      }
+      .header {
+        width: 100%;
+        height: 300px;
+        background-color: #f1dd7b;
+      }
+      .header-img01 {
+        margin-top: 100px;
+        width: 60%;
+        margin-left: 100px;
+      }
+      .header-img02 {
+        position: absolute;
+        width: 10%;
+        top: 20px;
+        right: 20px;
+      }
+      .bottom-container {
+        background-color: #f1dd7b;
+        background-image: url("./bottom01.png");
+        display: flex;
+        padding: 20px;
+        padding-top: 100px;
+        padding-right: 10%;
+      }
+      #hint-container {
+        width: 30%;
+        height: 500px;
+        background-color: white;
+        padding: 10px;
+      }
