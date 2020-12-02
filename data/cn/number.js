@@ -98,7 +98,7 @@ let headerFlag = false;
 if (!headerFlag) {
   fs.appendFileSync(
     filepath,
-    "期号,开奖日期,红球,蓝球,总销售额（元）,1注数,1中奖金额（元）,2注数,2中奖金额（元）,3注数,3中奖金额（元),奖池（元),详情"
+    "期号,开奖日期,红球,蓝球,总销售额（元）,1注数,1中奖金额（元）,2注数,2中奖金额（元）,3注数,3中奖金额（元),奖池（元),detail"
   );
   headerFlag = true;
 }
