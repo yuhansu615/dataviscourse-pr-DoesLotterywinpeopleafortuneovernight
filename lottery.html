@@ -6,11 +6,18 @@
       rel="stylesheet"
       href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
     />
+    <link
+      rel="stylesheet"
+      href="./asset/text-animate.css"
+    />
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="http://d3js.org/topojson.v1.min.js"></script>
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="./asset/elementui.js"></script>
     <style>
+      body {
+        min-width: 1200px;
+      }
       #container {
         display: flex;
         height: 500px;
@@ -61,10 +68,43 @@
         margin: 0 auto;
         margin-bottom: 100px;
       }
+      .header {
+        width: 100%;
+        height: 300px;
+        background-color: #f1dd7b;
+      }
+      .header-img01 {
+        margin-top: 100px;
+        width: 60%;
+        margin-left: 100px;
+      }
+      .header-img02 {
+        position: absolute;
+        width: 10%;
+        top: 20px;
+        right: 20px;
+      }
+      .bottom-container {
+        background-color: #f1dd7b;
+        background-image: url("./asset/bottom01.png");
+        display: flex;
+        padding: 20px;
+        padding-top: 100px;
+        padding-right: 10%;
+      }
+      .hint-container {
+        width: 30%;
+        height: 200px;
+        background-color: white;
+      }
     </style>
   </head>
   <body>
     <div id="root">
+      <div class="header">
+        <img class="header-img01" src="./asset/header01.png" />
+        <img class="header-img02" src="./asset/header02.png" />
+      </div>
       <div id="container">
         <svg id="svg1" style="width: 900; height: 600"></svg>
         <svg id="svg2" style="width: 900; height: 400"></svg>
@@ -81,82 +121,89 @@
       </div>
       <div id="my_dataviz2"></div>
       <div v-if="showLocationInfoBox" id="locationInfoBox">
-        <div>地區：{{locationInfoBoxDataSelected.province}}</div>
-        <div>出現次數：{{locationInfoBoxDataSelected?.list?.length}}</div>
+        <div>Location：{{locationInfoBoxDataSelected.province}}</div>
         <div>
-          出現店名：
+          Number of Occurrence：{{locationInfoBoxDataSelected?.list?.length}}
+        </div>
+        <div>
+          Name of the Store：
           <div v-for="item in locationInfoBoxDataSelected?.list" :key="item">
             {{item.shop}}
           </div>
         </div>
       </div>
       <div v-if="showPlotChartInfoBox" id="plotInfoBox">
-        <div>年份：{{plotInfoBoxDataSelected.year}}</div>
-        <div>數字：{{plotInfoBoxDataSelected.number}}</div>
-        <div>出現次數：{{plotInfoBoxDataSelected?.list?.length}}</div>
+        <div>Year：{{plotInfoBoxDataSelected.year}}</div>
+        <div>Number：{{plotInfoBoxDataSelected.number}}</div>
         <div>
-          出現月份：
+          Number of Occurrence：{{plotInfoBoxDataSelected?.list?.length}}
+        </div>
+        <div>
+          Month：
           <div v-for="item in plotInfoBoxDataSelected?.list" :key="item">
             {{item}}
           </div>
         </div>
       </div>
-      <el-card class="box-card">
-        <div class="bottomContainer">Lottery Simulator</div>
-        <div>
-          <el-input
-            maxlength="2"
-            class="inputNum"
-            v-model="num01"
-            placeholder=""
-          ></el-input>
-          <el-input
-            maxlength="2"
-            class="inputNum"
-            v-model="num02"
-            placeholder=""
-          ></el-input>
-          <el-input
-            maxlength="2"
-            class="inputNum"
-            v-model="num03"
-            placeholder=""
-          ></el-input>
-          <el-input
-            maxlength="2"
-            class="inputNum"
-            v-model="num04"
-            placeholder=""
-          ></el-input>
-          <el-input
-            maxlength="2"
-            class="inputNum"
-            v-model="num05"
-            placeholder=""
-          ></el-input>
-          <el-input
-            maxlength="2"
-            class="inputNum"
-            v-model="num06"
-            placeholder=""
-          ></el-input>
-          <el-button @click="handleBacktest" type="success" plain
-            >回測</el-button
-          >
-        </div>
-        <div class="prizeContainer">
-          <template>
-            <el-table :data="tableData" style="width: 100%">
-              <el-table-column prop="year" label="日期" width="180">
-              </el-table-column>
-              <el-table-column prop="isWinning" label="獎金" width="180">
-              </el-table-column>
-              <el-table-column prop="winningNumber" label="中獎細節">
-              </el-table-column>
-            </el-table>
-          </template>
-        </div>
-      </el-card>
+      <div class="bottom-container">
+        <el-card class="box-card">
+          <div>Lottery Simulator</div>
+          <div>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num01"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num02"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num03"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num04"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num05"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num06"
+              placeholder=""
+            ></el-input>
+            <el-button @click="handleBacktest" type="success" plain
+              >Try</el-button
+            >
+          </div>
+          <div class="prizeContainer">
+            <template>
+              <el-table :data="tableData" style="width: 100%">
+                <el-table-column prop="year" label="Date" width="180">
+                </el-table-column>
+                <el-table-column prop="isWinning" label="Prize" width="180">
+                </el-table-column>
+                <el-table-column prop="winningNumber" label="Detail">
+                </el-table-column>
+              </el-table>
+            </template>
+          </div>
+        </el-card>
+        <div class="hint-container"></div>
+      </div>
     </div>
   </body>
   <script>
@@ -183,7 +230,7 @@
         showPlotChartInfoBox: false,
         locationInfoBoxData: "",
         locationInfoBoxDataSelected: "",
-        showLocationInfoBox: true,
+        showLocationInfoBox: false,
       },
       computed: {
         numberGroup() {
@@ -206,11 +253,13 @@
             this.numberGroup.filter((num) => num && num >= 0 && num <= 49)
               .length < 6
           ) {
-            alert("號碼不齊全，且號碼必須為 1 到 49");
+            alert(
+              "The number is incomplete, and the number must between 1 - 49."
+            );
             return;
           }
           if (new Set(this.numberGroup).size < 6) {
-            alert("號碼重複");
+            alert("Number Duplicate.");
             return;
           }
           const c = [];
@@ -220,7 +269,7 @@
               period.numberArray,
               period.year
             );
-            if (result.isWinning !== "未中獎") {
+            if (result.isWinning !== "Not winning.") {
               c.push(result);
               this.tableData = c;
             }
@@ -358,8 +407,8 @@
                 d3.select(this).attr("fill-opacity", 0.6);
                 context.locationInfoBoxDataSelected = {
                   province: properties.C_Name,
-                  list: context.locationInfoBoxData[properties.C_Name]
-                }
+                  list: context.locationInfoBoxData[properties.C_Name],
+                };
                 context.showLocationInfoBox = true;
               })
               .on("mouseout", function (d) {
@@ -554,30 +603,30 @@
       const hasSpecial = result[array2[6]] === 1;
       function isWinning() {
         if (matchNumberCount === 3 && hasSpecial) {
-          return "柒獎 400";
+          return "Seventh Prize NTD 400";
         }
         if (matchNumberCount === 3 && !hasSpecial) {
-          return "普獎 400";
+          return "General Prize NTD 400";
         }
         if (matchNumberCount === 4 && hasSpecial) {
-          return "陸獎 1000";
+          return "Sixth Prize NTD 1000";
         }
         if (matchNumberCount === 4 && !hasSpecial) {
-          return "伍獎 2000";
+          return "Fifth Prize NTD 2000";
         }
         if (matchNumberCount === 5 && hasSpecial) {
-          return "肆獎 約一萬多";
+          return "Forth Prize Around NTD 10 thousand";
         }
         if (matchNumberCount === 5 && !hasSpecial) {
-          return "參獎 約五萬多";
+          return "Third Prize Around NTD 50 thousand";
         }
         if (matchNumberCount === 6 && hasSpecial) {
-          return "貳獎 約三百萬多";
+          return "Second Prize Around NTD 3 Million";
         }
         if (matchNumberCount === 6 && !hasSpecial) {
-          return "頭獎!! 一億以上";
+          return "Jackpot!! Over NTD 100 Million";
         }
-        return "未中獎";
+        return "Not winning.";
       }
 
       return {

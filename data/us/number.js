@@ -30,10 +30,15 @@ function sendRequest() {
   req.end();
 }
 
+let headerFlag = false;
 function parseDom(dom) {
   let count = 0;
   let columnCount = 7
   $ = cheerio.load(dom);
+  if (!headerFlag) {
+    fs.appendFileSync(filepath, "year,numbers,specialNumber,megaplier,EstimatedJackpot,JackpotWinners");
+    headerFlag = true;
+  }
   $("td").each((i, ele) => {
     if (count === columnCount || count === 0) {
       fs.appendFileSync(filepath, "\r\n");
