@@ -949,7 +949,7 @@
                 return y(Number(d.year));
               })
               .attr("r", 6)
-              .style("fill", (d) => twColorGrade(d.count))
+              .style("fill", (d) => context.countrySelection === 'TW' ? twColorGrade(d.count) : cnBallColorGrade(d.count))
               .on("mouseover", function (d) {
                 context.showPlotChartInfoBox = true;
                 d3.select(this).attr("fill-opacity", 0.6);
@@ -1005,6 +1005,23 @@
         return "#ff7043";
       }
       if (count > 250) {
+        return "#ab47bc";
+      }
+    };
+    const cnBallColorGrade = (count) => {
+      if (count <= 5) {
+        return "#1de9b6";
+      }
+      if (count < 10) {
+        return "#fff59d";
+      }
+      if (count < 15) {
+        return "#ffcc80";
+      }
+      if (count < 25) {
+        return "#ff7043";
+      }
+      if (count >= 25) {
         return "#ab47bc";
       }
     };
