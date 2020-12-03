@@ -38,12 +38,6 @@
         <div>
           Number of Occurrence：{{locationInfoBoxDataSelected?.list?.length}}
         </div>
-        <div>
-          Name of the Store：
-          <span v-for="item in locationInfoBoxDataSelected?.list" :key="item">
-            {{item?.shop}}
-          </span>
-        </div>
       </div>
       <div v-if="showPlotChartInfoBox" id="plotInfoBox">
         <div>Year：{{plotInfoBoxDataSelected.year}}</div>
@@ -292,7 +286,7 @@
               .enter()
               .append("path")
               .attr("d", path)
-              .attr("id", (d) => d.properties.name)
+              .attr("id", (d) => d.properties.name.replace(/\s/g, ""))
               .style("stroke", "#fff")
               .style("stroke-width", "1")
               .style("fill", "rgb(213,222,217)")
@@ -311,15 +305,15 @@
           });
 
           const locationData = await d3.json("./data/us/location.json");
-
           Object.keys(locationData).forEach((state) => {
-            d3.select(`#${state}`).style(
+            d3.select(`#${state.replace(/\s/g, "")}`).style(
               "fill",
               usColorGrade(locationData[state])
             );
           });
         },
         async renderCNMap({ scale }) {
+          const context = this;
           var width = 1200;
           var height = 500;
 
@@ -348,7 +342,19 @@
               .attr("id", (d) => d.properties.name)
               .style("stroke", "#fff")
               .style("stroke-width", "1")
-              .style("fill", "rgb(213,222,217)");
+              .style("fill", "rgb(213,222,217)")
+              .on("mouseover", function ({ properties }) {
+                context.showLocationInfoBox = true;
+                d3.select(this).attr("fill-opacity", 0.6);
+                context.locationInfoBoxDataSelected = {
+                  province: properties.name,
+                  list: new Array(resultDetail[properties.name]),
+                };
+              })
+              .on("mouseout", function (d) {
+                d3.select(this).attr("fill-opacity", 1);
+                context.showLocationInfoBox = false;
+              });
           });
           const locationData = await d3.csv("./data/cn/location.csv");
           const resultDetail = {};
@@ -380,15 +386,11 @@
             return indexOf >= 0 ? indexOf + (startpos || 0) : indexOf;
           };
           Object.keys(resultDetail).forEach((key) => {
-            console.log(key);
             if (key.regexIndexOf(/。|；|�|为|共|null/g) !== -1) {
               delete resultDetail[key];
             }
           });
-          console.log(resultDetail)
           Object.keys(resultDetail).forEach((state) => {
-            console.log(resultDetail[state])
-            console.log(twColorGrade(resultDetail[state]))
             d3.select(`#${state}`).style("fill", () =>
               cnColorGrade(resultDetail[state])
             );
@@ -589,32 +591,31 @@
       if (count <= 5) {
         return "#1de9b6";
       }
-      if (count > 5 && count <= 10) {
+      if (count < 10) {
         return "#fff59d";
       }
-      if (count > 10 && count <= 15) {
+      if (count < 15) {
         return "#ffcc80";
       }
-      if (count > 15 && count <= 20) {
+      if (count < 25) {
         return "#ff7043";
       }
-      if (count > 20) {
+      if (count > 25) {
         return "#ab47bc";
       }
     };
-
 
     const cnColorGrade = (count) => {
       if (count <= 50) {
         return "#1de9b6";
       }
-      if (count > 100) {
+      if (count < 100) {
         return "#fff59d";
       }
-      if (count > 150) {
+      if (count < 150) {
         return "#ffcc80";
       }
-      if (count > 200) {
+      if (count < 250) {
         return "#ff7043";
       }
       if (count > 250) {
