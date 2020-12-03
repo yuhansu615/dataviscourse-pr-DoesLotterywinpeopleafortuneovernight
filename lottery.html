@@ -25,9 +25,24 @@
       </div>
       <div class="buttonGroup">
         <template>
-          <el-radio @change="handleCountrySelection" v-model="countrySelection" label="US">United States</el-radio>
-          <el-radio @change="handleCountrySelection" v-model="countrySelection" label="CN">China</el-radio>
-          <el-radio @change="handleCountrySelection" v-model="countrySelection" label="TW">Taiwan</el-radio>
+          <el-radio
+            @change="handleCountrySelection"
+            v-model="countrySelection"
+            label="US"
+            >United States</el-radio
+          >
+          <el-radio
+            @change="handleCountrySelection"
+            v-model="countrySelection"
+            label="CN"
+            >China</el-radio
+          >
+          <el-radio
+            @change="handleCountrySelection"
+            v-model="countrySelection"
+            label="TW"
+            >Taiwan</el-radio
+          >
         </template>
       </div>
       <div id="my_dataviz2"></div>
@@ -52,12 +67,12 @@
       </div>
       <div class="bottom-container">
         <el-card class="box-card">
-          <div>Lottery Simulator</div>
+          <div>Lottery Simulator ({{countrySelection}})</div>
           <div style="font-size: 10px; color: gray">
             Please insert six numbers to see how lucky you are. The result would
             tell you how much you might win compared to the history.
           </div>
-          <div>
+          <div v-if="countrySelection === 'TW'">
             <el-input
               maxlength="2"
               class="inputNum"
@@ -92,6 +107,96 @@
               maxlength="2"
               class="inputNum"
               v-model="num06"
+              placeholder=""
+            ></el-input>
+            <el-button @click="handleBacktest" type="success" plain
+              >Try</el-button
+            >
+          </div>
+          <div v-if="countrySelection === 'US'">
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num01"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num02"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num03"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num04"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num05"
+              placeholder=""
+            ></el-input>
+            <el-input
+              style="border: 1px solid red"
+              maxlength="2"
+              class="inputNum"
+              v-model="num06"
+              placeholder=""
+            ></el-input>
+            <el-button @click="handleBacktest" type="success" plain
+              >Try</el-button
+            >
+          </div>
+          <div v-if="countrySelection === 'CN'">
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num01"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num02"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num03"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num04"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num05"
+              placeholder=""
+            ></el-input>
+            <el-input
+              maxlength="2"
+              class="inputNum"
+              v-model="num06"
+              placeholder=""
+            ></el-input>
+            <el-input
+              style="border: 1px solid red"
+              maxlength="2"
+              class="inputNum"
+              v-model="num07"
               placeholder=""
             ></el-input>
             <el-button @click="handleBacktest" type="success" plain
@@ -145,6 +250,7 @@
         num04: "",
         num05: "",
         num06: "",
+        num07: "",
         tableData: [],
         plotInfoBoxDataSelected: "",
         showPlotChartInfoBox: false,
@@ -154,7 +260,7 @@
         typingTimeout: "",
       },
       computed: {
-        numberGroup() {
+        numberGroupTW() {
           return [
             this.num01,
             this.num02,
@@ -162,6 +268,27 @@
             this.num04,
             this.num05,
             this.num06,
+          ];
+        },
+        numberGroupUS() {
+          return [
+            this.num01,
+            this.num02,
+            this.num03,
+            this.num04,
+            this.num05,
+            this.num06,
+          ];
+        },
+        numberGroupCN() {
+          return [
+            this.num01,
+            this.num02,
+            this.num03,
+            this.num04,
+            this.num05,
+            this.num06,
+            this.num07,
           ];
         },
       },
@@ -202,31 +329,60 @@
           this.showPlotChartInfoBox = false;
         },
         handleBacktest() {
-          if (
-            this.numberGroup.filter((num) => num && num >= 0 && num <= 49)
-              .length < 6
-          ) {
-            alert(
-              "The number is incomplete, and the number must between 1 - 49."
-            );
-            return;
-          }
-          if (new Set(this.numberGroup).size < 6) {
-            alert("Number Duplicate.");
-            return;
-          }
+          this.tableData = [];
+          // if (
+          //   this.numberGroup.filter((num) => num && num >= 0 && num <= 49)
+          //     .length < 6
+          // ) {
+          //   alert(
+          //     "The number is incomplete, and the number must between 1 - 49."
+          //   );
+          //   return;
+          // }
+          // if (new Set(this.numberGroup).size < 6) {
+          //   alert("Number Duplicate.");
+          //   return;
+          // }
           const c = [];
-          this.twhistoryPrizeInfo.forEach((period) => {
-            const result = compareTWNumber(
-              this.numberGroup,
-              period.numberArray,
-              period.year
-            );
-            if (result.isWinning !== "Not winning.") {
-              c.push(result);
-              this.tableData = c;
-            }
-          });
+          if (this.countrySelection === "US") {
+            this.ushistoryPrizeInfo.forEach((period) => {
+              const result = compareUSNumber(
+                this.numberGroupUS,
+                period.numberArray,
+                period.year,
+                period.specialNum
+              );
+              if (result.isWinning !== "Not winning.") {
+                c.push(result);
+                this.tableData = c;
+              }
+            });
+          } else if (this.countrySelection === "CN") {
+            this.cnhistoryPrizeInfo.forEach((period) => {
+              const result = compareCNNumber(
+                this.numberGroupCN,
+                period.numberArray,
+                period.year,
+                period.specialNum
+              );
+              if (result.isWinning !== "Not winning.") {
+                c.push(result);
+                this.tableData = c;
+              }
+            });
+          } else {
+            this.twhistoryPrizeInfo.forEach((period) => {
+              const result = compareTWNumber(
+                this.numberGroupTW,
+                period.numberArray,
+                period.year
+              );
+              if (result.isWinning !== "Not winning.") {
+                c.push(result);
+                this.tableData = c;
+              }
+            });
+          }
           this.typeWriter();
         },
         async handleCheckboxChange(e) {
@@ -286,13 +442,13 @@
           const chartNumInfo = [];
           const data = await d3.csv("./data/cn/number.csv");
           data.forEach((ele) => {
-            const year = ele['开奖日期'].slice(0, 4);
-            let numberArray = ele['红球'].match(/.{1,2}/g);
+            const year = ele["开奖日期"].slice(0, 4);
+            let numberArray = ele["红球"].match(/.{1,2}/g);
             // 中獎回測資料
             this.cnhistoryPrizeInfo.push({
               numberArray,
-              specialNum: ele['蓝球'],
-              year: ele.year,
+              specialNum: ele["蓝球"],
+              year: ele["开奖日期"],
             });
             // 圖表資料
             numberArray.forEach((num) => {
@@ -311,7 +467,7 @@
               if (!numInfoDetail[year][num]) {
                 numInfoDetail[year][num] = [];
               }
-              numInfoDetail[year][num].push(ele['开奖日期']);
+              numInfoDetail[year][num].push(ele["开奖日期"]);
             });
           });
           this.cnplotInfoBoxData = numInfoDetail;
@@ -578,7 +734,7 @@
           });
         },
         renderPlotChart() {
-          document.querySelector('#my_dataviz2').innerHTML = "";
+          document.querySelector("#my_dataviz2").innerHTML = "";
           var margin = { top: 10, right: 30, bottom: 40, left: 50 },
             width = 1120 - margin.left - margin.right,
             height = 520 - margin.top - margin.bottom;
@@ -657,9 +813,9 @@
             dotGroup
               .selectAll("circle")
               .data(
-                this.countrySelection === 'US'
+                this.countrySelection === "US"
                   ? this.usLotteryChartData
-                  : this.countrySelection === 'TW'
+                  : this.countrySelection === "TW"
                   ? this.twLotteryChartData
                   : this.cnLotteryChartData
               )
@@ -679,11 +835,12 @@
                 context.plotInfoBoxDataSelected = {
                   number: d.number,
                   year: d.year,
-                  list: context.countrySelection === 'US'
-                    ? context.usplotInfoBoxData[d.year][d.number]
-                    : context.countrySelection === 'TW'
-                    ? context.twplotInfoBoxData[d.year][d.number]
-                    : context.cnplotInfoBoxData[d.year][d.number],
+                  list:
+                    context.countrySelection === "US"
+                      ? context.usplotInfoBoxData[d.year][d.number]
+                      : context.countrySelection === "TW"
+                      ? context.twplotInfoBoxData[d.year][d.number]
+                      : context.cnplotInfoBoxData[d.year][d.number],
                 };
               })
               .on("mouseout", function (d) {
@@ -803,6 +960,145 @@
             .filter((d) => d[1] === 1)
             .map((d) => d[0])
         ),
+        matchNumberCount,
+        specialNum: array2[6],
+        hasSpecial,
+        isWinning: isWinning(),
+        year,
+      };
+    }
+
+    function compareUSNumber(array1, array2, year, specialNum) {
+      var result = {};
+      const userSelectionSpecialNum = array1[5];
+      array1
+        .slice(0, 5)
+        .map((d) => Number(d))
+        .forEach(function (item) {
+          result[item] = 0;
+        });
+
+      array2
+        .map((d) => Number(d))
+        .forEach(function (item) {
+          if (result.hasOwnProperty(item)) {
+            result[item]++;
+          }
+        });
+      const matchNumberCount = Object.entries(result)
+        .map((arr) => arr[1])
+        .reduce((a, b) => a + b);
+      const hasSpecial = userSelectionSpecialNum === specialNum;
+      // matchNumberCount 不包含 special number
+      function isWinning() {
+        if (matchNumberCount === 0 && hasSpecial) {
+          return "General Prize USD $2";
+        }
+        if (matchNumberCount === 1 && hasSpecial) {
+          return "Seventh Prize USD $4";
+        }
+        if (matchNumberCount === 2 && hasSpecial) {
+          return "Sixth Prize USD $10";
+        }
+        if (matchNumberCount === 3 && !hasSpecial) {
+          return "Fifth Prize USD $10";
+        }
+        if (matchNumberCount === 3 && hasSpecial) {
+          return "Forth Prize Around USD $200";
+        }
+        if (matchNumberCount === 4 && !hasSpecial) {
+          return "Third Prize Around USD $500";
+        }
+        if (matchNumberCount === 5 && hasSpecial) {
+          return "Jackpot!! Over USD $1,000,000,00 up";
+        }
+        if (matchNumberCount === 5 && !hasSpecial) {
+          return "Second Prize Around USD $1,000,000";
+        }
+        return "Not winning.";
+      }
+
+      return {
+        winningNumber:
+          matchNumberCount === 0 && hasSpecial
+            ? JSON.stringify([specialNum]) // 只中特別號時
+            : JSON.stringify(
+                Object.entries(result)
+                  .filter((d) => d[1] === 1)
+                  .map((d) => d[0])
+              ),
+        matchNumberCount,
+        specialNum: array2[6],
+        hasSpecial,
+        isWinning: isWinning(),
+        year,
+      };
+    }
+
+    function compareCNNumber(array1, array2, year, specialNum) {
+      var result = {};
+      const userSelectionSpecialNum = array1[6];
+      array1
+        .slice(0, 6)
+        .map((d) => Number(d))
+        .forEach(function (item) {
+          result[item] = 0;
+        });
+
+      array2
+        .map((d) => Number(d))
+        .forEach(function (item) {
+          if (result.hasOwnProperty(item)) {
+            result[item]++;
+          }
+        });
+      const matchNumberCount = Object.entries(result)
+        .map((arr) => arr[1])
+        .reduce((a, b) => a + b);
+      const hasSpecial = userSelectionSpecialNum === specialNum;
+      function isWinning() {
+        if (matchNumberCount === 0 && hasSpecial) {
+          return "Seventh Prize CNY $5";
+        }
+        if (matchNumberCount === 1 && hasSpecial) {
+          return "Seventh Prize CNY $5";
+        }
+        if (matchNumberCount === 2 && hasSpecial) {
+          return "Seventh Prize CNY $5";
+        }
+        if (matchNumberCount === 3 && hasSpecial) {
+          return "General Prize CNY $10";
+        }
+        if (matchNumberCount === 4 && !hasSpecial) {
+          return "Sixth Prize CNY $10";
+        }
+        if (matchNumberCount === 4 && hasSpecial) {
+          return "Fifth Prize CNY $200";
+        }
+        if (matchNumberCount === 5 && !hasSpecial) {
+          return "Forth Prize Around CNY $200";
+        }
+        if (matchNumberCount === 5 && hasSpecial) {
+          return "Third Prize Around CNY $3000";
+        }
+        if (matchNumberCount === 6 && hasSpecial) {
+          return "Jackpot!! Over CNY $1 billion";
+        }
+        if (matchNumberCount === 6 && !hasSpecial) {
+          return "Second Prize Around CNY 5 Million";
+        }
+        return "Not winning.";
+      }
+
+      return {
+        winningNumber:
+          matchNumberCount === 0 && hasSpecial
+            ? JSON.stringify([specialNum])
+            : JSON.stringify(
+                Object.entries(result)
+                  .filter((d) => d[1] === 1)
+                  .map((d) => d[0])
+              ),
         matchNumberCount,
         specialNum: array2[6],
         hasSpecial,
