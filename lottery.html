@@ -25,11 +25,9 @@
       </div>
       <div class="buttonGroup">
         <template>
-          <el-checkbox-group @change="handleCheckboxChange" v-model="checkList">
-            <el-checkbox label="United States"></el-checkbox>
-            <el-checkbox label="China"></el-checkbox>
-            <el-checkbox label="Taiwan"></el-checkbox>
-          </el-checkbox-group>
+          <el-radio @change="handleCountrySelection" v-model="countrySelection" label="US">United States</el-radio>
+          <el-radio @change="handleCountrySelection" v-model="countrySelection" label="CN">China</el-radio>
+          <el-radio @change="handleCountrySelection" v-model="countrySelection" label="TW">Taiwan</el-radio>
         </template>
       </div>
       <div id="my_dataviz2"></div>
@@ -55,8 +53,9 @@
       <div class="bottom-container">
         <el-card class="box-card">
           <div>Lottery Simulator</div>
-          <div style="font-size: 10px;color: gray">
-            Please insert six numbers to see how lucky you are. The result would tell you how much you might win compared to the history.
+          <div style="font-size: 10px; color: gray">
+            Please insert six numbers to see how lucky you are. The result would
+            tell you how much you might win compared to the history.
           </div>
           <div>
             <el-input
@@ -121,7 +120,9 @@
       el: "#root",
       created: async function () {
         this.resetMap();
+        this.usLotteryChartData = await this.processUSData();
         this.twLotteryChartData = await this.processTWData();
+        this.cnLotteryChartData = await this.processCNData();
         this.renderPlotChart();
 
         this.typeWriter();
@@ -129,7 +130,15 @@
       data: {
         checkList: ["United States", "China", "Taiwan"],
         twLotteryChartData: "",
-        historyPrizeInfo: [],
+        usLotteryChartData: "",
+        cnLotteryChartData: "",
+        twhistoryPrizeInfo: [],
+        ushistoryPrizeInfo: [],
+        cnhistoryPrizeInfo: [],
+        twplotInfoBoxData: "",
+        usplotInfoBoxData: "",
+        cnplotInfoBoxData: "",
+        countrySelection: "US",
         num01: "",
         num02: "",
         num03: "",
@@ -137,7 +146,6 @@
         num05: "",
         num06: "",
         tableData: [],
-        plotInfoBoxData: "",
         plotInfoBoxDataSelected: "",
         showPlotChartInfoBox: false,
         locationInfoBoxData: "",
@@ -158,6 +166,9 @@
         },
       },
       methods: {
+        handleCountrySelection() {
+          this.renderPlotChart();
+        },
         typeWriter() {
           const context = this;
           if (this.typingTimeout) {
@@ -205,7 +216,7 @@
             return;
           }
           const c = [];
-          this.historyPrizeInfo.forEach((period) => {
+          this.twhistoryPrizeInfo.forEach((period) => {
             const result = compareTWNumber(
               this.numberGroup,
               period.numberArray,
@@ -221,6 +232,100 @@
         async handleCheckboxChange(e) {
           //const list = e.slice(0, e.length);
         },
+        async processUSData() {
+          const numInfo = {};
+          const numInfoDetail = {};
+          const chartNumInfo = [];
+          const data = await d3.csv("./data/us/number.csv");
+          data.forEach((ele) => {
+            const year = ele.year.slice(6, 10);
+            const numberArray = ele.numbers.split(" - ");
+            // 中獎回測資料
+            this.ushistoryPrizeInfo.push({
+              numberArray,
+              specialNum: ele.specialNumber,
+              year: ele.year,
+            });
+            // 圖表資料
+            numberArray.forEach((num) => {
+              // 記錄開出次數
+              if (!numInfo[year]) {
+                numInfo[year] = {};
+              }
+              if (!numInfo[year][num]) {
+                numInfo[year][num] = 0;
+              }
+              numInfo[year][num] += 1;
+              // 記錄開出月份
+              if (!numInfoDetail[year]) {
+                numInfoDetail[year] = {};
+              }
+              if (!numInfoDetail[year][num]) {
+                numInfoDetail[year][num] = [];
+              }
+              numInfoDetail[year][num].push(ele.year);
+            });
+          });
+          delete numInfo[""];
+          delete numInfoDetail[""];
+          this.usplotInfoBoxData = numInfoDetail;
+          Object.keys(numInfo).forEach((year) => {
+            Object.keys(numInfo[year]).forEach((number) => {
+              chartNumInfo.push({
+                year,
+                number,
+                count: numInfo[year][number],
+              });
+            });
+          });
+          return chartNumInfo;
+        },
+        async processCNData() {
+          const numInfo = {};
+          const numInfoDetail = {};
+          const chartNumInfo = [];
+          const data = await d3.csv("./data/cn/number.csv");
+          data.forEach((ele) => {
+            const year = ele['开奖日期'].slice(0, 4);
+            let numberArray = ele['红球'].match(/.{1,2}/g);
+            // 中獎回測資料
+            this.cnhistoryPrizeInfo.push({
+              numberArray,
+              specialNum: ele['蓝球'],
+              year: ele.year,
+            });
+            // 圖表資料
+            numberArray.forEach((num) => {
+              // 記錄開出次數
+              if (!numInfo[year]) {
+                numInfo[year] = {};
+              }
+              if (!numInfo[year][num]) {
+                numInfo[year][num] = 0;
+              }
+              numInfo[year][num] += 1;
+              // 記錄開出月份
+              if (!numInfoDetail[year]) {
+                numInfoDetail[year] = {};
+              }
+              if (!numInfoDetail[year][num]) {
+                numInfoDetail[year][num] = [];
+              }
+              numInfoDetail[year][num].push(ele['开奖日期']);
+            });
+          });
+          this.cnplotInfoBoxData = numInfoDetail;
+          Object.keys(numInfo).forEach((year) => {
+            Object.keys(numInfo[year]).forEach((number) => {
+              chartNumInfo.push({
+                year,
+                number,
+                count: numInfo[year][number],
+              });
+            });
+          });
+          return chartNumInfo;
+        },
         async processTWData() {
           const numInfo = {};
           const numInfoDetail = {};
@@ -230,7 +335,7 @@
             const year = ele.year.slice(0, 4);
             let numberArray = ele.numbers.match(/.{1,2}/g);
             // 中獎回測資料
-            this.historyPrizeInfo.push({
+            this.twhistoryPrizeInfo.push({
               numberArray,
               specialNum: numberArray[6],
               year: ele.year,
@@ -255,7 +360,7 @@
               numInfoDetail[year][num].push(ele.year);
             });
           });
-          this.plotInfoBoxData = numInfoDetail;
+          this.twplotInfoBoxData = numInfoDetail;
           Object.keys(numInfo).forEach((year) => {
             Object.keys(numInfo[year]).forEach((number) => {
               chartNumInfo.push({
@@ -398,17 +503,6 @@
               cnColorGrade(resultDetail[state])
             );
           });
-
-          // cc = "北京20注河北1注山西1注福建2注江西1注山东2注四川2注陕西1注宁夏2注新疆1注"
-          //   .split(/注/g)
-          //   .map((word) => word.split(/(?=\d)/g))
-          //   .map((item) => {
-          //     if (item.length === 3) {
-          //       item[1] = item[1] + item[2];
-          //       item.pop();
-          //     }
-          //     return item;
-          //   });
         },
         renderTWMap({ scale }) {
           const context = this;
@@ -484,6 +578,7 @@
           });
         },
         renderPlotChart() {
+          document.querySelector('#my_dataviz2').innerHTML = "";
           var margin = { top: 10, right: 30, bottom: 40, left: 50 },
             width = 1120 - margin.left - margin.right,
             height = 520 - margin.top - margin.bottom;
@@ -520,7 +615,7 @@
             // Add Y axis
             var y = d3
               .scaleLinear()
-              .domain([2005, 2020])
+              .domain([2003, 2020])
               .range([height, 0])
               .nice();
             Svg.append("g")
@@ -561,7 +656,13 @@
             const context = this;
             dotGroup
               .selectAll("circle")
-              .data(this.twLotteryChartData)
+              .data(
+                this.countrySelection === 'US'
+                  ? this.usLotteryChartData
+                  : this.countrySelection === 'TW'
+                  ? this.twLotteryChartData
+                  : this.cnLotteryChartData
+              )
               .enter()
               .append("circle")
               .attr("cx", function (d) {
@@ -578,7 +679,11 @@
                 context.plotInfoBoxDataSelected = {
                   number: d.number,
                   year: d.year,
-                  list: context.plotInfoBoxData[d.year][d.number],
+                  list: context.countrySelection === 'US'
+                    ? context.usplotInfoBoxData[d.year][d.number]
+                    : context.countrySelection === 'TW'
+                    ? context.twplotInfoBoxData[d.year][d.number]
+                    : context.cnplotInfoBoxData[d.year][d.number],
                 };
               })
               .on("mouseout", function (d) {

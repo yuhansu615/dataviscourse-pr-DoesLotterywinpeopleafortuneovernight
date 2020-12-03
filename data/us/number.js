@@ -49,8 +49,10 @@ function parseDom(dom) {
     //   // 移除後面六個用來描述開出順序的數字
     //   content = content.slice(0, 0);
     // }
-    fs.appendFileSync(filepath, `${count !== 0 ? "," : ""}${content.replace(/,/g, "")}`);
-    count += 1;
+    if(!content.match(/First Drawing/g)) {
+      fs.appendFileSync(filepath, `${count !== 0 ? "," : ""}${content.replace(/,/g, "")}`);
+      count += 1;
+    }
   });
   // if (reqPageNum < totalPageCount) {
   //   reqPageNum += 1;
