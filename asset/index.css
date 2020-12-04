@@ -10,11 +10,8 @@
         text-align: center;
         margin-bottom: 50px;
       }
-      #my_dataviz2 {
+      #plotchartsvg {
         text-align: center;
-      }
-      .bottomContainer {
-        height: 30px;
       }
       .inputNum {
         width: 80px;
@@ -78,6 +75,7 @@
         padding: 20px;
         padding-top: 100px;
         padding-right: 5%;
+        margin-top: 50px;
       }
       #hint-container {
         width: 30%;

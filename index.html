@@ -45,7 +45,7 @@
           >
         </template>
       </div>
-      <div id="my_dataviz2"></div>
+      <div id="plotchartsvg"></div>
       <div v-if="showLocationInfoBox" id="locationInfoBox">
         <div>Location：{{locationInfoBoxDataSelected.province}}</div>
         <div>
@@ -330,21 +330,22 @@
         },
         handleBacktest() {
           this.tableData = [];
-          // if (
-          //   this.numberGroup.filter((num) => num && num >= 0 && num <= 49)
-          //     .length < 6
-          // ) {
-          //   alert(
-          //     "The number is incomplete, and the number must between 1 - 49."
-          //   );
-          //   return;
-          // }
-          // if (new Set(this.numberGroup).size < 6) {
-          //   alert("Number Duplicate.");
-          //   return;
-          // }
           const c = [];
           if (this.countrySelection === "US") {
+            if ( // https://www.megamillions.com/How-to-Play.aspx
+                 // 更早之前球號有到 75
+              this.numberGroupUS.filter((num) => num && num >= 0 && num <= 70)
+                .length < 6
+            ) {
+              alert(
+                "The number is incomplete, and the number must between 1 - 70."
+              );
+              return;
+            }
+            if (new Set(this.numberGroupUS).size < 6) {
+              alert("Number Duplicate.");
+              return;
+            }
             this.ushistoryPrizeInfo.forEach((period) => {
               const result = compareUSNumber(
                 this.numberGroupUS,
@@ -358,6 +359,19 @@
               }
             });
           } else if (this.countrySelection === "CN") {
+            if ( // http://sports.sina.com.cn/l/rule/ssq/
+              this.numberGroupCN.filter((num) => num && num >= 0 && num <= 33)
+                .length < 7
+            ) {
+              alert(
+                "The number is incomplete, and the number must between 1 - 33."
+              );
+              return;
+            }
+            if (new Set(this.numberGroupCN).size < 7) {
+              alert("Number Duplicate.");
+              return;
+            }
             this.cnhistoryPrizeInfo.forEach((period) => {
               const result = compareCNNumber(
                 this.numberGroupCN,
@@ -371,6 +385,19 @@
               }
             });
           } else {
+            if (
+              this.numberGroupTW.filter((num) => num && num >= 0 && num <= 49)
+                .length < 6
+            ) {
+              alert(
+                "The number is incomplete, and the number must between 1 - 49."
+              );
+              return;
+            }
+            if (new Set(this.numberGroupTW).size < 6) {
+              alert("Number Duplicate.");
+              return;
+            }
             this.twhistoryPrizeInfo.forEach((period) => {
               const result = compareTWNumber(
                 this.numberGroupTW,
@@ -384,9 +411,6 @@
             });
           }
           this.typeWriter();
-        },
-        async handleCheckboxChange(e) {
-          //const list = e.slice(0, e.length);
         },
         async processUSData() {
           const numInfo = {};
@@ -562,7 +586,7 @@
                 text: "< 20",
               },
               {
-                color: "#1de9b6",
+                color: "#6573c3",
                 text: "< 25",
               },
               {
@@ -658,7 +682,7 @@
                 text: "< 250",
               },
               {
-                color: "#1de9b6",
+                color: "#6573c3",
                 text: "> 250",
               },
               {
@@ -855,14 +879,15 @@
           });
         },
         renderPlotChart() {
-          document.querySelector("#my_dataviz2").innerHTML = "";
+          document.querySelector("#plotchartsvg").innerHTML = "";
+
           var margin = { top: 10, right: 30, bottom: 40, left: 50 },
             width = 1120 - margin.left - margin.right,
             height = 520 - margin.top - margin.bottom;
 
           // append the svg object to the body of the page
           var Svg = d3
-            .select("#my_dataviz2")
+            .select("#plotchartsvg")
             .append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -877,7 +902,13 @@
             "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/iris.csv"
           ).then(async (data) => {
             // Add X axis
-            var x = d3.scaleLinear().domain([0, 60]).range([0, width]);
+            if (this.countrySelection === "TW") {
+              var x = d3.scaleLinear().domain([0, 50]).range([0, width]);
+            } else if (this.countrySelection === "US") {
+              var x = d3.scaleLinear().domain([0, 75]).range([0, width]);
+            } else {
+              var x = d3.scaleLinear().domain([0, 50]).range([0, width]);
+            }
             Svg.append("g")
               .attr("transform", "translate(0," + height + ")")
               .call(
@@ -911,7 +942,7 @@
             // Add X axis label:
             Svg.append("text")
               .attr("text-anchor", "end")
-              .attr("x", width)
+              .attr("x", width + 20)
               .attr("y", height + margin.top + 20)
               .text("Numbers");
 
@@ -919,15 +950,10 @@
             Svg.append("text")
               .attr("text-anchor", "end")
               .attr("transform", "rotate(-90)")
-              .attr("y", -margin.left + 20)
+              .attr("y", -margin.left + 10)
               .attr("x", -margin.top)
               .text("Years");
 
-            // Color scale: give me a specie name, I return a color
-            var color = d3
-              .scaleOrdinal()
-              .domain(["setosa", "versicolor", "virginica"])
-              .range(["#402D54", "#D18975", "#8FD175"]);
             // Add dots
             const dotGroup = Svg.append("g").attr("id", "dotGroup");
             const context = this;
@@ -949,7 +975,11 @@
                 return y(Number(d.year));
               })
               .attr("r", 6)
-              .style("fill", (d) => context.countrySelection === 'TW' ? twColorGrade(d.count) : cnBallColorGrade(d.count))
+              .style("fill", (d) =>
+                context.countrySelection === "TW"
+                  ? twColorGrade(d.count)
+                  : cnBallColorGrade(d.count)
+              )
               .on("mouseover", function (d) {
                 context.showPlotChartInfoBox = true;
                 d3.select(this).attr("fill-opacity", 0.6);
@@ -969,6 +999,49 @@
                 d3.select(this).attr("fill-opacity", 1);
               });
           });
+          const labels = [
+            {
+              color: "#1de9b6",
+              text: "< 5",
+            },
+            {
+              color: "#fff59d",
+              text: "< 10",
+            },
+            {
+              color: "#ffcc80",
+              text: "< 15",
+            },
+            {
+              color: "#ff7043",
+              text: "< 20",
+            },
+            {
+              color: "#6573c3",
+              text: "< 25",
+            },
+            {
+              color: "#ab47bc",
+              text: "> 25",
+            },
+          ];
+          const gap = 70;
+          labels.forEach((label, i) => {
+            d3.select("#plotchartsvg svg")
+              .append("rect")
+              .attr("x", 330 + gap * i)
+              .attr("y", 500)
+              .attr("width", 10)
+              .attr("height", 10)
+              .attr("fill", label.color)
+              .attr("id", "rectLabel");
+            d3.select("#plotchartsvg svg")
+              .append("text")
+              .attr("x", 350 + gap * i)
+              .attr("y", 508.5)
+              .attr("font-size", 12)
+              .text(label.text);
+          });
         },
       },
     });
@@ -984,7 +1057,7 @@
         return "#ffcc80";
       }
       if (count < 25) {
-        return "#ff7043";
+        return "#6573c3";
       }
       if (count > 25) {
         return "#ab47bc";
@@ -1002,7 +1075,7 @@
         return "#ffcc80";
       }
       if (count < 250) {
-        return "#ff7043";
+        return "#6573c3";
       }
       if (count > 250) {
         return "#ab47bc";
@@ -1018,8 +1091,11 @@
       if (count < 15) {
         return "#ffcc80";
       }
-      if (count < 25) {
+      if (count < 20) {
         return "#ff7043";
+      }
+      if (count < 25) {
+        return "#6573c3";
       }
       if (count >= 25) {
         return "#ab47bc";
