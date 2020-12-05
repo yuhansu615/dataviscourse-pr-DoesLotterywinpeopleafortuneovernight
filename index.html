@@ -304,16 +304,16 @@
           document.getElementById("hint-container").innerHTML = "";
           var i = 0;
           var txt = `
-                      Jackpot ! It is only 0.001% to
-                      win this fortune. Lottery is essentially a type of Gambling.
-                      Please use your money carefully. As it shows in some of the
+                      Jackpot ! <br> It is only 0.001% to
+                      win this fortune. <br> Lottery is essentially a type of Gambling.
+                      Please use your money carefully. <br> As it shows in some of the
                       social studies, people with financial problems, especially in
                       the pendemic period, are tend to be addicted to small gambling
-                      like Lottery. They would: · gamble regardless of their financial
-                      situation and that of their families · become heavily indebted,
-                      resulting in family problems (including child abuse and suicide)
+                      like Lottery. <br> They would: <br> · gamble regardless of their financial
+                      situation and that of their families <br> · become heavily indebted,
+                      resulting in family problems (including child abuse and suicide) <br>
                       · sometimes connect with gangs, usury and other social problems`; /* The text */
-          var speed = 500; /* The speed/duration of the effect in milliseconds */
+          var speed = 1000; /* The speed/duration of the effect in milliseconds */
           function doTyping() {
             if (i < txt.length) {
               document.getElementById("hint-container").innerHTML += txt.charAt(
