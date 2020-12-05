@@ -570,11 +570,11 @@
           d3.json("./data/us/state.json").then(function (json) {
             const labels = [
               {
-                color: "#1de9b6",
+                color: "#588cle",
                 text: "< 5",
               },
               {
-                color: "#fff59d",
+                color: "#acbc8a",
                 text: "< 10",
               },
               {
@@ -582,7 +582,7 @@
                 text: "< 15",
               },
               {
-                color: "#ff7043",
+                color: "#e99469",
                 text: "< 20",
               },
               {
@@ -590,7 +590,7 @@
                 text: "< 25",
               },
               {
-                color: "#ab47bc",
+                color: "#bc5952",
                 text: "> 25(Bigger than 25)",
               },
             ];
@@ -666,27 +666,27 @@
           d3.json("./data/cn/state.json").then(function (json) {
             const labels = [
               {
-                color: "#1de9b6",
+                color: "#588cle",
                 text: "< 50",
               },
               {
-                color: "#fff59d",
+                color: "#acbc8a",
                 text: "< 100",
               },
               {
-                color: "#ffcc80",
+                color: "#ecd189",
                 text: "< 150",
               },
               {
-                color: "#ff7043",
+                color: "#e99469",
                 text: "< 250",
               },
               {
                 color: "#6573c3",
-                text: "> 250",
+                text: "> 250(Bigger than 250)",
               },
               {
-                color: "#ab47bc",
+                color: "#bc5952",
                 text: "> 250(Bigger than 250)",
               },
             ];
@@ -775,11 +775,11 @@
           d3.json("./data/tw/state.json").then(function (topodata) {
             const labels = [
               {
-                color: "#1de9b6",
+                color: "#588cle",
                 text: "< 5",
               },
               {
-                color: "#fff59d",
+                color: "#acbc8a",
                 text: "< 10",
               },
               {
@@ -787,7 +787,7 @@
                 text: "< 15",
               },
               {
-                color: "#ab47bc",
+                color: "#bc5952",
                 text: "> 20",
               },
             ];
@@ -1001,11 +1001,11 @@
           });
           const labels = [
             {
-              color: "#1de9b6",
+              color: "#588cle",
               text: "< 5",
             },
             {
-              color: "#fff59d",
+              color: "#acbc8a",
               text: "< 10",
             },
             {
@@ -1013,7 +1013,7 @@
               text: "< 15",
             },
             {
-              color: "#ff7043",
+              color: "#e99469",
               text: "< 20",
             },
             {
@@ -1021,7 +1021,7 @@
               text: "< 25",
             },
             {
-              color: "#ab47bc",
+              color: "#bc5952",
               text: "> 25(Bigger than 25)",
             },
           ];
@@ -1048,75 +1048,75 @@
 
     const usColorGrade = (count) => {
       if (count <= 5) {
-        return "#1de9b6";
+        return "#588cle";
       }
       if (count < 10) {
-        return "#fff59d";
+        return "#acbc8a";
       }
       if (count < 15) {
-        return "#ffcc80";
+        return "#ecd189";
       }
       if (count < 25) {
         return "#6573c3";
       }
       if (count > 25) {
-        return "#ab47bc";
+        return "#bc5952";
       }
     };
 
     const cnColorGrade = (count) => {
       if (count <= 50) {
-        return "#1de9b6";
+        return "#588cle";
       }
       if (count < 100) {
-        return "#fff59d";
+        return "#acbc8a";
       }
       if (count < 150) {
-        return "#ffcc80";
+        return "#ecd189";
       }
       if (count < 250) {
         return "#6573c3";
       }
       if (count > 250) {
-        return "#ab47bc";
+        return "#bc5952";
       }
     };
     const cnBallColorGrade = (count) => {
       if (count <= 5) {
-        return "#1de9b6";
+        return "#588cle";
       }
       if (count < 10) {
-        return "#fff59d";
+        return "#acbc8a";
       }
       if (count < 15) {
-        return "#ffcc80";
+        return "#ecd189";
       }
       if (count < 20) {
-        return "#ff7043";
+        return "#e99469";
       }
       if (count < 25) {
         return "#6573c3";
       }
       if (count >= 25) {
-        return "#ab47bc";
+        return "#bc5952";
       }
     };
 
     const twColorGrade = (count) => {
       if (count <= 5) {
-        return "#1de9b6";
+        return "#588cle";
       }
       if (count > 5 && count <= 10) {
-        return "#fff59d";
+        return "#acbc8a";
       }
       if (count > 10 && count <= 15) {
-        return "#ffcc80";
+        return "#ecd189";
       }
       if (count > 15 && count <= 20) {
-        return "#ff7043";
+        return "#e99469";
       }
       if (count > 20) {
-        return "#ab47bc";
+        return "#bc5952";
       }
     };
 
