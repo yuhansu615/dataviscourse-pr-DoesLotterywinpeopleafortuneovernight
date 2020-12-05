@@ -79,7 +79,8 @@
       }
       #hint-container {
         width: 30%;
-        height: 500px;
+        height: 830px;
         background-color: white;
         padding: 10px;
+        font-size: 25px;
       }

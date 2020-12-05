@@ -16,7 +16,7 @@
     <div id="root">
       <div class="header">
         <img class="header-img01" src="./asset/header01.png" />
-        <img class="header-img02" src="./asset/header02.png" />
+        <img class="header-img02" src="./asset/header01.gif" />
       </div>
       <div id="container">
         <svg id="svg1" style="width: 900; height: 600"></svg>
@@ -67,6 +67,7 @@
       </div>
       <div class="bottom-container">
         <el-card class="box-card">
+          <img style="width: 500px" src="./asset/powerball.png" />
           <div>Lottery Simulator ({{countrySelection}})</div>
           <div style="font-size: 30px; color: gray">
             Please insert six numbers to see how lucky you are. The result would
@@ -304,16 +305,16 @@
           document.getElementById("hint-container").innerHTML = "";
           var i = 0;
           var txt = `
-                      Jackpot ! <br> It is only 0.001% to
-                      win this fortune. <br> Lottery is essentially a type of Gambling.
-                      Please use your money carefully. <br> As it shows in some of the
+                      Jackpot ! It is only 0.001% to
+                      win this fortune. Lottery is essentially a type of Gambling.
+                      Please use your money carefully. As it shows in some of the
                       social studies, people with financial problems, especially in
                       the pendemic period, are tend to be addicted to small gambling
-                      like Lottery. <br> They would: <br> · gamble regardless of their financial
-                      situation and that of their families <br> · become heavily indebted,
-                      resulting in family problems (including child abuse and suicide) <br>
+                      like Lottery. They would: · gamble regardless of their financial
+                      situation and that of their families · become heavily indebted,
+                      resulting in family problems (including child abuse and suicide)
                       · sometimes connect with gangs, usury and other social problems`; /* The text */
-          var speed = 1000; /* The speed/duration of the effect in milliseconds */
+          var speed = 50; /* The speed/duration of the effect in milliseconds */
           function doTyping() {
             if (i < txt.length) {
               document.getElementById("hint-container").innerHTML += txt.charAt(
@@ -570,7 +571,7 @@
           d3.json("./data/us/state.json").then(function (json) {
             const labels = [
               {
-                color: "#588cle",
+                color: "#588c7e",
                 text: "< 5",
               },
               {
@@ -591,7 +592,7 @@
               },
               {
                 color: "#bc5952",
-                text: "> 25(Bigger than 25)",
+                text: "> 25",
               },
             ];
             const gap = 70;
@@ -666,7 +667,7 @@
           d3.json("./data/cn/state.json").then(function (json) {
             const labels = [
               {
-                color: "#588cle",
+                color: "#588c7e",
                 text: "< 50",
               },
               {
@@ -683,11 +684,11 @@
               },
               {
                 color: "#6573c3",
-                text: "> 250(Bigger than 250)",
+                text: "> 250",
               },
               {
                 color: "#bc5952",
-                text: "> 250(Bigger than 250)",
+                text: "> 250",
               },
             ];
             const gap = 80;
@@ -775,7 +776,7 @@
           d3.json("./data/tw/state.json").then(function (topodata) {
             const labels = [
               {
-                color: "#588cle",
+                color: "#588c7e",
                 text: "< 5",
               },
               {
@@ -1001,7 +1002,7 @@
           });
           const labels = [
             {
-              color: "#588cle",
+              color: "#588c7e",
               text: "< 5",
             },
             {
@@ -1022,7 +1023,7 @@
             },
             {
               color: "#bc5952",
-              text: "> 25(Bigger than 25)",
+              text: "> 25",
             },
           ];
           const gap = 70;
@@ -1048,7 +1049,7 @@
 
     const usColorGrade = (count) => {
       if (count <= 5) {
-        return "#588cle";
+        return "#588c7e";
       }
       if (count < 10) {
         return "#acbc8a";
@@ -1066,7 +1067,7 @@
 
     const cnColorGrade = (count) => {
       if (count <= 50) {
-        return "#588cle";
+        return "#588c7e";
       }
       if (count < 100) {
         return "#acbc8a";
@@ -1083,7 +1084,7 @@
     };
     const cnBallColorGrade = (count) => {
       if (count <= 5) {
-        return "#588cle";
+        return "#588c7e";
       }
       if (count < 10) {
         return "#acbc8a";
@@ -1104,7 +1105,7 @@
 
     const twColorGrade = (count) => {
       if (count <= 5) {
-        return "#588cle";
+        return "#588c7e";
       }
       if (count > 5 && count <= 10) {
         return "#acbc8a";
