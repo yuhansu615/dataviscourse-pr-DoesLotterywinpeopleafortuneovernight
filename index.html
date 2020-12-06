@@ -680,11 +680,11 @@
               },
               {
                 color: "#e99469",
-                text: "< 250",
+                text: "< 200",
               },
               {
                 color: "#6573c3",
-                text: "> 250",
+                text: < 250",
               },
               {
                 color: "#bc5952",
@@ -1074,6 +1074,9 @@
       }
       if (count < 150) {
         return "#ecd189";
+      }
+      if (count < 200) {
+        return "#e99469";
       }
       if (count < 250) {
         return "#6573c3";
